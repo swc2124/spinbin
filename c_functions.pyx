@@ -170,6 +170,7 @@ def integerize(
 
     print('[before ] py min, mean, max : ', y.min(), ',', y.mean(), ',', y.max())
     cdef np.ndarray[np.float64_t, ndim = 1, mode='c'] y1 = y.round(3)
+    
     y1 += center
     y1 *= scale
     y2 = y1.astype(np.int32)
