@@ -1,35 +1,35 @@
 # ============================================================================
 # Author                : swc21
 # Date                  : 2018-03-15 14:39:45
-# 
+#
 # Project               : GitHub
 # File Name             : c_functions
-# 
+#
 # Last Modified by      : swc21
-# Last Modified time    : 2018-03-15 14:43:01
+# Last Modified time    : 2018-03-15 18:27:38
 # ============================================================================
-# 
+#
 from __future__ import division
 from __future__ import print_function
 
+import ConfigParser
 import cython
+import ebf
 import numpy as np
 import os
+import skysurvey
 import sys
 
 from cython.parallel import parallel
 from cython.parallel import prange
 from os.path import join
-cimport numpy as np
-import ebf
+from skysurvey.new_config import SYS_CFG_FNAME
 from libc.stdlib cimport rand
 from libc.math cimport cos
 from libc.math cimport sin
-from lic.math cimport M_PI
-import ConfigParser
-import skysurvey
+from libc.math cimport M_PI
 
-from skysurvey.new_config import SYS_CFG_FNAME
+cimport numpy as np
 sys_config_fh = os.path.join(os.path.dirname(
     os.path.realpath(skysurvey.__file__)), SYS_CFG_FNAME)
 SysConfig = ConfigParser.ConfigParser()
@@ -48,7 +48,9 @@ else:
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def rotation_matrix(np.ndarray[np.float64_t, ndim=1, mode='c'] ax, np.float64_t th):
+def rotation_matrix(
+        np.ndarray[np.float64_t, ndim=1, mode='c'] ax,
+        np.float64_t th):
     '''
     Description : used to rotate x,y,z arrays. usually called by <rotate>.
     Parameters
@@ -68,7 +70,10 @@ def rotation_matrix(np.ndarray[np.float64_t, ndim=1, mode='c'] ax, np.float64_t 
     b, c, d = -(ax / (np.dot(ax, ax))**2) * np.sin(th / 2.0)
     aa, bb, cc, dd, bc = a * a, b * b, c * c, d * d, b * c
     ad, ac, ab, bd, cd = a * d, a * c, a * b, b * d, c * d
-    return [aa + bb - cc - dd, 2.0 * (bc + ad), 2.0 * (bd - ac)], [2.0 * (bc - ad), aa + cc - bb - dd, 2.0 * (cd + ab)], [2.0 * (bd + ac), 2.0 * (cd - ab), aa + dd - bb - cc]
+    return (
+        [aa + bb - cc - dd, 2.0 * (bc + ad), 2.0 * (bd - ac)],
+        [2.0 * (bc - ad), aa + cc - bb - dd, 2.0 * (cd + ab)],
+        [2.0 * (bd + ac), 2.0 * (cd - ab), aa + dd - bb - cc])
 
 
 @cython.boundscheck(False)
@@ -153,7 +158,7 @@ def integerize(
     center = Config.getint('grid_options', 'size') / 2
     scale = Config.getint('grid_options', 'size') / (x.max() + np.abs(x.min()))
     line = '-' * 85
-    #print('converting px and py arrays to integers')
+    # print('converting px and py arrays to integers')
     print(line)
     print('[ integerize ]', '\n')
     print('[before ] px min, mean, max : ',
@@ -200,7 +205,12 @@ def bin(
         # Apparent magnitude (apparent_mag).
         np.float64_t apparent_mag
         # The grid array (grid)
-        np.ndarray[np.float64_t, ndim = 3, mode = 'c'] grid = np.zeros((Config.getint('grid_options', 'size'), Config.getint('grid_options', 'size'), Config.getint('grid_options', 'n_slices')), dtype=np.float64)
+        np.ndarray[np.float64_t, ndim = 3, mode = 'c'] grid = np.zeros(
+            (
+                Config.getint('grid_options', 'size'),
+                Config.getint('grid_options', 'size'),
+                Config.getint('grid_options', 'n_slices')),
+            dtype=np.float64)
         # Satprop arrays. TODO package data file
         np.ndarray[np.float32_t, ndim = 1] tsat = SATPROP['tsat']
         np.ndarray[np.int32_t, ndim = 1] bsat = SATPROP['bsat']
@@ -208,8 +218,10 @@ def bin(
         np.ndarray[np.int32_t, ndim = 1] nsatc = SATPROP['nsatc']
         # Index arrays
         np.ndarray[np.int64_t, ndim = 1] idx_1, idx_2
-        # np.ndarray[np.int64_t, ndim=1] idx_1 = np.nonzero(bsat[satid + nsatc[2]] == 0)[0]
-        # np.ndarray[np.int64_t, ndim=1] idx_2 = np.nonzero(bsat[satid + nsatc[2]] == 0)[1]
+        # np.ndarray[np.int64_t, ndim=1] idx_1 = np.nonzero(
+        #     bsat[satid + nsatc[2]] == 0)[0]
+        # np.ndarray[np.int64_t, ndim=1] idx_2 = np.nonzero(
+        #     bsat[satid + nsatc[2]] == 0)[1]
         # Number of stars (n_stars) to bin.
         np.int_t n_stars = len(px)
         # Number of threads
@@ -246,10 +258,11 @@ def bin(
     with nogil, parallel(num_threads=n_threads):
         for i in prange(n_stars, schedule='dynamic'):
             # Check to see if star is in FOV of grid.
-            if (px[i] >= boundary_x
-                or px[i] <= 0
-                or py[i] >= boundary_y
-                    or py[i] <= 0):
+            if (
+                    px[i] >= boundary_x or
+                    px[i] <= 0 or
+                    py[i] >= boundary_y or
+                    py[i] <= 0):
                 missed += 1
             # If star is in the grid.
             else:
@@ -264,7 +277,7 @@ def bin(
                     grid[px[i], py[i], 0] += 1.0
                     # Magnitudes.
                     grid[px[i], py[i], 1] += ab_mags[i]
-                    #grid[px[i], py[i], 2] += apparent_mag
+                    # grid[px[i], py[i], 2] += apparent_mag
                     # if apparent_mag < mlim_min:
                     #    grid[px[i], py[i], 3] += 1.0
                     # if apparent_mag < mlim_med:
@@ -279,17 +292,17 @@ def bin(
                 else:
                     bound += 1
                     # Bin stars.
-                    #grid[px[i], py[i], 8] += 1.0
+                    # grid[px[i], py[i], 8] += 1.0
                     # Magnitudes.
-                    #grid[px[i], py[i], 9] += ab_mags[i]
-                    #grid[px[i], py[i], 10] += apparent_mag
+                    # grid[px[i], py[i], 9] += ab_mags[i]
+                    # grid[px[i], py[i], 10] += apparent_mag
                     # Accretion time (Gyr).
-                    #grid[px[i], py[i], 11] += sat_age
+                    # grid[px[i], py[i], 11] += sat_age
                     # Satid.
-                    #grid[px[i], py[i], 12] += sat_number
+                    # grid[px[i], py[i], 12] += sat_number
                     if not sat_bound:
                         bad += 1
-                #grid[px[i], py[i], 13] += 1
+                # grid[px[i], py[i], 13] += 1
                 grid[px[i], py[i], 4] += r_proj[i]
     # Slices that need to be divided by the number of stars in each bin.
     idx_1, idx_2 = np.nonzero(grid[:, :, 0] > 0.)
@@ -297,14 +310,14 @@ def bin(
     grid[idx_1, idx_2, 2] /= grid[idx_1, idx_2, 0]
     grid[idx_1, idx_2, 3] /= grid[idx_1, idx_2, 0]
     grid[idx_1, idx_2, 4] /= grid[idx_1, idx_2, 0]
-    #grid[idx_1, idx_2, 14] /= grid[idx_1, idx_2, 0]
-    #idx_1, idx_2 = np.nonzero(grid[:, :, 8] > 0.)
-    #grid[idx_1, idx_2, 9] /= grid[idx_1, idx_2, 8]
-    #grid[idx_1, idx_2, 10] /= grid[idx_1, idx_2, 8]
-    #grid[idx_1, idx_2, 11] /= grid[idx_1, idx_2, 8]
-    #grid[idx_1, idx_2, 12] /= grid[idx_1, idx_2, 8]
-    #idx_1, idx_2 = np.nonzero(grid[:, :, 13] > 0.)
-    #grid[idx_1, idx_2, 14] /= grid[idx_1, idx_2, 13]
+    # grid[idx_1, idx_2, 14] /= grid[idx_1, idx_2, 0]
+    # idx_1, idx_2 = np.nonzero(grid[:, :, 8] > 0.)
+    # grid[idx_1, idx_2, 9] /= grid[idx_1, idx_2, 8]
+    # grid[idx_1, idx_2, 10] /= grid[idx_1, idx_2, 8]
+    # grid[idx_1, idx_2, 11] /= grid[idx_1, idx_2, 8]
+    # grid[idx_1, idx_2, 12] /= grid[idx_1, idx_2, 8]
+    # idx_1, idx_2 = np.nonzero(grid[:, :, 13] > 0.)
+    # grid[idx_1, idx_2, 14] /= grid[idx_1, idx_2, 13]
     print('\n-------------------------------')
     print('    bound stars: ', bound)
     print('  unbound stars: ', unbound)
@@ -356,7 +369,8 @@ def box_lims(
         np.float64_t outter_box = (box_size + box_step)
         np.float64_t neg_outter_box = -(outter_box)
         np.float64_t neg_box_size = -(box_size)
-        np.ndarray[np.int64_t, ndim = 1, mode = 'c'] idx_arr = np.zeros((n_stars), dtype=np.int64)
+        np.ndarray[np.int64_t, ndim = 1, mode = 'c'] idx_arr = np.zeros(
+            (n_stars), dtype=np.int64)
         np.int_t n_threads = np.int(px.shape[0]/1e6)
     # Set (threads)
     if n_threads >= NUM_PROCESSORS:
@@ -402,7 +416,10 @@ def rotate_positions(
         int J = xyz_arr.shape[1]
         int K = xyz_arr.shape[0]
         np.float64_t s, a, aa, bb, cc, dd, bc, ad, ac, ab, bd, cd, b, c, d
-    for a, b, c, d in [(cos(theta1), 0, 0, -sin(theta1)), (cos(theta2), 0, -sin(theta2), 0), (cos(theta3), -sin(theta3), 0, 0)]:
+    for a, b, c, d in [
+            (cos(theta1), 0, 0, -sin(theta1)),
+            (cos(theta2), 0, -sin(theta2), 0),
+            (cos(theta3), -sin(theta3), 0, 0)]:
         aa, bb, cc, dd, bc = a * a, b * b, c * c, d * d, b * c
         ad, ac, ab, bd, cd = a * d, a * c, a * b, b * d, c * d
         rot_matrix[0][:] = [aa + bb - cc - dd,
