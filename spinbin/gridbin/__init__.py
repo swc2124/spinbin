@@ -2,7 +2,7 @@
 -------
 gridbin
 -------
-The gridbin module contains several basic cython functions for
-supporting the other spinbin modules.
+The gridbin module contains fast cython binning functions for supporting the
+`skysurvey` package.
 
 """

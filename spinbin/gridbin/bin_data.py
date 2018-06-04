@@ -8,6 +8,46 @@ def bin(
         np.ndarray[np.float64_t, ndim=1] r_proj,
         np.ndarray[np.float64_t, ndim=1] lims,
         np.ndarray[np.int32_t, ndim=1] satid):
+    """[summary]
+
+    [description]
+
+    Parameters
+    ----------
+    np.ndarray[np.int32_t : {[type]}
+        [description]
+    np.ndarray[np.int32_t : {[type]}
+        [description]
+    np.ndarray[np.float64_t : {[type]}
+        [description]
+    np.ndarray[np.float64_t : {[type]}
+        [description]
+    np.ndarray[np.float64_t : {[type]}
+        [description]
+    np.ndarray[np.float64_t : {[type]}
+        [description]
+    np.ndarray[np.int32_t : {[type]}
+        [description]
+    ndim : {[type]}, optional
+        [description] (the default is 1] px, which [default_description])
+    ndim : {[type]}, optional
+        [description] (the default is 1] py, which [default_description])
+    ndim : {[type]}, optional
+        [description] (the default is 1] ab_mags, which [default_description])
+    ndim : {[type]}, optional
+        [description] (the default is 1] ap_mags, which [default_description])
+    ndim : {[type]}, optional
+        [description] (the default is 1] r_proj, which [default_description])
+    ndim : {[type]}, optional
+        [description] (the default is 1] lims, which [default_description])
+    ndim : {[type]}, optional
+        [description] (the default is 1] satid, which [default_description])
+
+    Returns
+    -------
+    [type]
+        [description]
+    """
     line = '-' * 85
     print(line)
     print('\n', '[ bin ]', '\n')
