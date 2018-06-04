@@ -1,8 +1,7 @@
 --------------------
 Welcome to `spinbin`
 --------------------
-Welcome to `spinbin`, a Python package for fast 2 dimensional data binning
-using `cython` and `numpy`.
+Welcome to `spinbin`, a Python package for fast multiprocessing 2 and 3 dimensional data binning using `cython` and `numpy`.  This package supports my `skysurvey` package and is an expanded version of the included `c_functions` extension module within `skysurvey`.
 
 Provides:
 
@@ -22,19 +21,17 @@ figured out.
 
 Using PIP
 ---------
-Below are the instruction examples for installing spinbin with PIP.
-.. _PIP : https://packaging.python.org/tutorials/installing-packages
+Below are the instruction examples for installing spinbin with [PIP](https://packaging.python.org/tutorials/installing-packages).
 
-    From the spinbin top level directory, run the following:
+From the spinbin top level directory, run the following:
 
     >>> pip install ./ -v
 
 Using setup.py
 --------------
 Below are the instruction examples for installing spinbin using the basic
-setup.py script.
-.. _setup.py : https://docs.python.org/2/install
+[setup.py](https://docs.python.org/2/install) script.
 
-    From the spinbin top level directory, run the following:
+From the spinbin top level directory, run the following:
 
     >>> python setup.py
