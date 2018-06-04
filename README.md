@@ -1,6 +1,6 @@
--------
-spinbin
--------
+--------------------
+Welcome to `spinbin`
+--------------------
 Welcome to `spinbin`, a Python package for fast 2 dimensional data binning
 using `cython` and `numpy`.
 
